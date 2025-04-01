@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -8,51 +8,42 @@ import {
   StyleSheet,
   SafeAreaView,
 } from 'react-native';
+import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
-import LinearGradient from 'react-native-linear-gradient';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useSignUp } from '../../context/SignUpContext';
 import { AuthStackParamList } from '../../types/navigation';
 import logo from '../../assets/images/logoms.png';
 import googleLogo from '../../assets/images/google-logo.png';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 type NavigationProp = NativeStackNavigationProp<AuthStackParamList>;
 
-const LoginScreen: React.FC = () => {
+const SignUpScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
-  const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  // const navigation = useNavigation<NavigationProps['navigation']>(); // Áp dụng kiểu
+  const { signUpData, updateSignUpData } = useSignUp();
 
-  // Ẩn thanh điều hướng
   React.useLayoutEffect(() => {
     navigation.setOptions({
-      headerShown: false, // Ẩn navigation bar
+      headerShown: false,
     });
   }, [navigation]);
 
-  const handleSubmit = () => {
-    if (!email || !password) {
-      console.log('Email and password are required');
+  const handleNext = () => {
+    if (!signUpData.email) {
+      console.log('Please enter an email or username');
       return;
     }
-    console.log({ email, password });
+    navigation.navigate('SignUpStep1');
   };
 
-  const handlePhoneLogin = () => {
-    // Logic cho đăng nhập bằng số điện thoại (có thể điều hướng đến màn hình nhập số điện thoại)
+  const handlePhoneSignUp = () => {
     console.log('Tiếp tục bằng số điện thoại');
-    // Ví dụ: navigation.navigate('PhoneLogin');
   };
 
   return (
-    <LinearGradient
-      colors={['#1a0033', '#004d40']} // Gradient từ tím đậm đến xanh đậm
-      style={styles.loginContainer}
-    >
+    <LinearGradient colors={['#1a0033', '#004d40']} style={styles.container}>
       <SafeAreaView style={styles.innerContainer}>
-        {/* Back Arrow */}
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => navigation.navigate('Welcome')}
@@ -60,75 +51,43 @@ const LoginScreen: React.FC = () => {
           <Icon name="arrow-back" size={28} color="#fff" />
         </TouchableOpacity>
 
-        {/* Logo */}
-        <View style={styles.loginLogo}>
+        <View style={styles.logoContainer}>
           <Image source={logo} style={styles.logoImage} />
-          <Text style={styles.title}>Đăng nhập</Text>
+          <Text style={styles.title}>SIGN UP</Text>
         </View>
 
-        {/* Email Input */}
         <View style={styles.inputGroup}>
-          <Text style={styles.label}>Email hoặc Tên người dùng</Text>
+          <Text style={styles.label}>Email or Username</Text>
           <TextInput
             style={styles.input}
-            placeholder=""
+            placeholder="Email or Username"
             placeholderTextColor="#aaa"
-            value={email}
-            onChangeText={setEmail}
+            value={signUpData.email}
+            onChangeText={(text) => updateSignUpData({ email: text })}
             keyboardType="email-address"
             autoCapitalize="none"
           />
         </View>
 
-        {/* Password Input */}
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Mật khẩu</Text>
-          <View style={styles.passwordContainer}>
-            <TextInput
-              style={styles.input}
-              placeholder=""
-              placeholderTextColor="#aaa"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry={!showPassword}
-            />
-            <TouchableOpacity
-              style={styles.eyeIcon}
-              onPress={() => setShowPassword(!showPassword)}
-            >
-              <Icon
-                name={showPassword ? 'visibility-off' : 'visibility'}
-                size={24}
-                color="#fff"
-              />
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* Login Button */}
-        <TouchableOpacity style={styles.loginButton} onPress={handleSubmit}>
-          <Text style={styles.loginButtonText}>Đăng nhập</Text>
+        <TouchableOpacity style={styles.nextButton} onPress={handleNext}>
+          <Text style={styles.nextButtonText}>NEXT</Text>
         </TouchableOpacity>
 
-        {/* Forgot Password & Sign Up Links */}
-        <Text style={styles.linkText}>Bạn quên mật khẩu?</Text>
         <Text style={styles.linkText}>
-          Chưa có tài khoản?{' '}
+          Đã có tài khoản?{' '}
           <Text
             style={styles.signUpText}
-            onPress={() => navigation.navigate('SignUp')}
+            onPress={() => navigation.navigate('Login')}
           >
-            Đăng ký
+            Đăng nhập
           </Text>
         </Text>
 
-        {/* Phone Login Button */}
-        <TouchableOpacity style={styles.phoneButton} onPress={handlePhoneLogin}>
+        <TouchableOpacity style={styles.phoneButton} onPress={handlePhoneSignUp}>
           <Icon name="phone" size={24} color="#fff" style={styles.phoneIcon} />
           <Text style={styles.phoneButtonText}>Tiếp tục bằng số điện thoại</Text>
         </TouchableOpacity>
 
-        {/* Google Login Button */}
         <TouchableOpacity style={styles.googleButton}>
           <Image source={googleLogo} style={styles.googleIcon} />
           <Text style={styles.googleButtonText}>Tiếp tục bằng Google</Text>
@@ -139,7 +98,7 @@ const LoginScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  loginContainer: {
+  container: {
     flex: 1,
   },
   innerContainer: {
@@ -151,11 +110,11 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 50,
     left: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)', // Nền mờ cho nút back
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
     borderRadius: 20,
     padding: 8,
   },
-  loginLogo: {
+  logoContainer: {
     alignItems: 'center',
     marginBottom: 40,
   },
@@ -182,7 +141,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   input: {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)', // Nền mờ cho input
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
     color: '#fff',
     padding: 12,
     borderRadius: 10,
@@ -195,16 +154,8 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
   },
-  passwordContainer: {
-    position: 'relative',
-  },
-  eyeIcon: {
-    position: 'absolute',
-    right: 15,
-    top: 12,
-  },
-  loginButton: {
-    backgroundColor: '#00cc99', // Màu xanh của nút LOGIN
+  nextButton: {
+    backgroundColor: '#00cc99',
     padding: 15,
     borderRadius: 30,
     alignItems: 'center',
@@ -215,7 +166,7 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     elevation: 5,
   },
-  loginButtonText: {
+  nextButtonText: {
     color: '#fff',
     fontSize: 18,
     fontWeight: 'bold',
@@ -230,16 +181,16 @@ const styles = StyleSheet.create({
     opacity: 0.9,
   },
   signUpText: {
-    color: '#00cc99', // Màu xanh cho "Sign up for WebMusic"
+    color: '#00cc99',
     fontWeight: '600',
   },
   phoneButton: {
     flexDirection: 'row',
-    backgroundColor: 'rgba(255, 255, 255, 0.1)', // Nền mờ cho nút Phone
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
     padding: 15,
     borderRadius: 30,
     alignItems: 'center',
-    justifyContent: 'space-between', // Đẩy icon và text ra hai bên
+    justifyContent: 'space-between',
     marginTop: 25,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.2)',
@@ -250,23 +201,23 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   phoneIcon: {
-    marginLeft: 15, // Đẩy icon sát lề trái
+    marginLeft: 15,
   },
   phoneButtonText: {
-    flex: 1, // Chiếm toàn bộ không gian còn lại
+    flex: 1,
     color: '#fff',
     fontSize: 16,
     fontWeight: '500',
-    textAlign: 'center', // Căn giữa chữ
+    textAlign: 'center',
   },
   googleButton: {
     flexDirection: 'row',
-    backgroundColor: 'rgba(255, 255, 255, 0.1)', // Nền mờ cho nút Google
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
     padding: 15,
     borderRadius: 30,
     alignItems: 'center',
-    justifyContent: 'space-between', // Đẩy icon và text ra hai bên
-    marginTop: 15, // Khoảng cách với nút Phone
+    justifyContent: 'space-between',
+    marginTop: 25,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.2)',
     shadowColor: '#000',
@@ -278,15 +229,15 @@ const styles = StyleSheet.create({
   googleIcon: {
     width: 24,
     height: 24,
-    marginLeft: 15, // Đẩy icon sát lề trái, thẳng hàng với icon Phone
+    marginLeft: 15,
   },
   googleButtonText: {
-    flex: 1, // Chiếm toàn bộ không gian còn lại
+    flex: 1,
     color: '#fff',
     fontSize: 16,
     fontWeight: '500',
-    textAlign: 'center', // Căn giữa chữ
+    textAlign: 'center',
   },
 });
 
-export default LoginScreen;
+export default SignUpScreen;

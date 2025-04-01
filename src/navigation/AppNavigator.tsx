@@ -1,18 +1,22 @@
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import LoginScreen from '../screens/auth/LoginScreen';
-import WellcomeScreen from '../screens/auth/WelcomeScreen'
-import { RootStackParamList } from '@src/types/index'; // Import kiểu
+import React from 'react';
+import { createStackNavigator } from '@react-navigation/stack';
+import AuthNavigator from './AuthNavigator';
+import MainNavigator from './MainNavigator';
+import { RootStackParamList } from '../types/navigation';
+const Stack = createStackNavigator<RootStackParamList>();
 
-const Stack = createNativeStackNavigator<RootStackParamList>();
+const AppNavigator = () => {
+  const isAuthenticated = false;
 
-const AppNavigator = () => (
-  <NavigationContainer>
-    <Stack.Navigator>
-      <Stack.Screen name="Login" component={LoginScreen} />
-      {/* <Stack.Screen name="WelcomeScreen" component={WellcomeScreen} /> */}
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      {isAuthenticated ? (
+        <Stack.Screen name="Main" component={MainNavigator} />
+      ) : (
+        <Stack.Screen name="Auth" component={AuthNavigator} />
+      )}
     </Stack.Navigator>
-  </NavigationContainer>
-);
+  );
+};
 
 export default AppNavigator;
